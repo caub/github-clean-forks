@@ -69,47 +69,8 @@ form.onsubmit = async e => {
 				break;
 			}
 		}
-
-		const rems = removables.reduce((m, {lvl, ...rest}) => m.set(lvl, [...m.get(lvl), rest]), new Map([[0,[]],[1,[]],[2,[]],[3,[]]]));
-		output.innerHTML = `
-<details open>
-<summary>0: no branch from you -> safely removable</summary>
-<ul>
-	${rems.get(0).map(({id, nameWithOwner}) => `<li data-id="${id}" data-name="${nameWithOwner}">${link(`https://github.com/${nameWithOwner}`)}<a title="remove ${nameWithOwner}"></a></li>`).join('')}
-</ul>
-</details>
-
-<details open>
-<summary>1: at most a branch with a CLOSED/MERGED PR -> quite safe, but you may want to check the closed ones</summary>
-<ul>
-	${rems.get(1).map(({id, nameWithOwner, parent}) => `<li data-id="${id}" data-name="${nameWithOwner}">${link(`https://github.com/${parent}/pulls/${login}?q=is:closed`)}<a title="remove ${nameWithOwner}"></a></li>`).join('')}
-</ul>
-</details>
-
-<details open>
-<summary>2: a branch with no PR -> could be removed, but check those branches first</summary>
-<ul>
-	${rems.get(2).map(({id, nameWithOwner, branches}) => `<li data-id="${id}" data-name="${nameWithOwner}">${link(`https://github.com/${nameWithOwner}`)}<a title="remove ${nameWithOwner}"></a><nav>${branches.map(br => link(`https://github.com/${nameWithOwner}/tree/${br.name}`, br.name)).join('')}</nav></li>`).join('')}
-</ul>
-</details>
-
-
-<details open>
-<summary>3: an OPEN PR -> don't remove, or check it if you want to close it (if old)</summary>
-<ul>
-	${rems.get(3).map(({id, nameWithOwner, parent, branches}) => `<li data-id="${id}" data-name="${nameWithOwner}" title="Most recent PR: ${branches[0]&&branches[0].prs[0]&&branches[0].prs[0].createdAt.slice(0,10)}">${link(`https://github.com/${parent}/pulls/${login}`)}<a title="remove ${nameWithOwner}"></a></li>`).join('')}
-</ul>
-</details>`;
-
-		output.onclick = e => {
-			const el = e.target;
-			if (el.tagName !== 'A' || el.href) return;
-			const li = el.closest('li');
-			if (!li) return;
-			if (!window.confirm(`delete ${li.dataset.name} fork?`)) return;
-
-			fetch(`https://api.github.com/repos/${li.dataset.name}?access_token=${localStorage.ghToken}`, {method: 'DELETE'}).then(r => r.json()).finally(console.log);
-		};
+		
+		renderResults(removables);
 
 	} catch(err) {
 		output.innerHTML = `<a href="https://developer.github.com/v4/guides/forming-calls/#authenticating-with-graphql">${err && err.message || 'Create a GH token!'}</a>`
@@ -208,6 +169,55 @@ const getForks = ({login, after, first = 100}) => gql({
 		}
 
 */
+
+const renderResults = removables => {
+	const rems = removables.reduce((m, {lvl, ...rest}) => m.set(lvl, [...m.get(lvl), rest]), new Map([[0,[]],[1,[]],[2,[]],[3,[]]]));
+	const login = form.login.value;
+
+	output.innerHTML = `
+<details open>
+<summary>0: no branch from you -> safely removable <span class="count">${rems.get(0).length}</span></summary>
+<ul>
+	${rems.get(0).map(({id, nameWithOwner}) => `<li data-id="${id}" data-name="${nameWithOwner}">${link(`https://github.com/${nameWithOwner}`)}<a title="remove ${nameWithOwner}"></a></li>`).join('')}
+</ul>
+</details>
+
+<details open>
+<summary>1: at most a branch with a CLOSED/MERGED PR -> quite safe, but you may want to check the closed ones <span class="count">${rems.get(1).length}</span></summary>
+<ul>
+	${rems.get(1).map(({id, nameWithOwner, parent}) => `<li data-id="${id}" data-name="${nameWithOwner}">${link(`https://github.com/${parent}/pulls/${login}?q=is:closed`)}<a title="remove ${nameWithOwner}"></a></li>`).join('')}
+</ul>
+</details>
+
+<details open>
+<summary>2: a branch with no PR -> could be removed, but check those branches first <span class="count">${rems.get(2).length}</span></summary>
+<ul>
+	${rems.get(2).map(({id, nameWithOwner, branches}) => `<li data-id="${id}" data-name="${nameWithOwner}">${link(`https://github.com/${nameWithOwner}`)}<a title="remove ${nameWithOwner}"></a><nav>${branches.map(br => link(`https://github.com/${nameWithOwner}/tree/${br.name}`, br.name)).join('')}</nav></li>`).join('')}
+</ul>
+</details>
+
+
+<details open>
+<summary>3: an OPEN PR -> don't remove, or check it if you want to close it (if old) <span class="count">${rems.get(3).length}</span></summary>
+<ul>
+	${rems.get(3).map(({id, nameWithOwner, parent, branches}) => `<li data-id="${id}" data-name="${nameWithOwner}" title="Most recent PR: ${branches[0]&&branches[0].prs[0]&&branches[0].prs[0].createdAt.slice(0,10)}">${link(`https://github.com/${parent}/pulls/${login}`)}<a title="remove ${nameWithOwner}"></a></li>`).join('')}
+</ul>
+</details>`;
+
+	output.onclick = e => {
+		const el = e.target;
+		if (el.tagName !== 'A' || el.href) return;
+		const li = el.closest('li');
+		if (!li) return;
+		if (!window.confirm(`delete ${li.dataset.name} fork?`)) return;
+
+		fetch(`https://api.github.com/repos/${li.dataset.name}?access_token=${localStorage.ghToken}`, {method: 'DELETE'}).then(r => r.json())
+			.finally(() => {
+				const r = removables.filter(rep => rep.nameWithOwner !== li.dataset.name);
+				renderResults(r); // render again
+			});
+	};
+}
 
 
 const gql = ({query, variables}) => fetch('https://api.github.com/graphql', {
