@@ -108,7 +108,7 @@ form.onsubmit = async e => {
 			if (!li) return;
 			if (!window.confirm(`delete ${li.dataset.name} fork?`)) return;
 
-			fetch(`https://api.github.com/repos/${login}/${li.dataset.name}?access_token=${localStorage.ghToken}`, {method: 'DELETE'}).then(r => r.json()).finally(console.log);
+			fetch(`https://api.github.com/repos/${li.dataset.name}?access_token=${localStorage.ghToken}`, {method: 'DELETE'}).then(r => r.json()).finally(console.log);
 		};
 
 	} catch(err) {
