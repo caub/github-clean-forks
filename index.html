@@ -15,12 +15,25 @@ input {
 	font-size: 1.5em;
 	margin: .5em auto;
 }
-input[type=submit] {
+[type=submit] {
 	background: transparent;
 	border: 1px solid gray;
 	font-feature-settings: 'liga' 1;
 	padding: 5px 10px;
 }
+
+[type="submit"]:disabled {
+	animation: loading 3s infinite;
+}
+@keyframes loading {
+  from, to {
+    filter: opacity(1);
+  }
+  50% {
+    filter: opacity(.2);
+  }
+}
+
 form {
 	position: relative;
 	display: flex;
