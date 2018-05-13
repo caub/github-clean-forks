@@ -11,27 +11,35 @@ h1 {
 h1 > a {
 	text-decoration: none;
 }
-input {
+input, button {
 	font-size: 1.5em;
 	margin: .5em auto;
 }
 [type="submit"] {
 	background: transparent;
-	border: 1px solid gray;
+	border: 1px solid lightgray;
 	font-feature-settings: 'liga' 1;
-	padding: 5px 10px;
+	border-radius: 50%;
+	width: 50;
+	height: 50;
+}
+button[type="submit"]::before {
+	content: "🔍";
 }
 
 [type="submit"]:disabled {
-	animation: loading 3s infinite;
+	border-color: lightblue;
+	border-width: 2px;
+	border-right-color: transparent;
+	animation: loading 1s infinite linear;
 }
+button[type="submit"]:disabled::before {
+	content: "";
+}
+
 @keyframes loading {
-  from, to {
-    filter: opacity(1);
-  }
-  50% {
-    filter: opacity(.2);
-  }
+  0%    { transform: rotate(0deg); }
+  100%  { transform: rotate(360deg); }
 }
 
 form {
@@ -88,7 +96,7 @@ nav a {
 <form>
 	<input name="login" placeholder="Github login" required>
 	<input name="token" placeholder="Github API token" required>
-	<input type="submit" value="🔍">
+	<button name="sb" type="submit"></button>
 </form>
 
 <div id="output">

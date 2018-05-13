@@ -27,8 +27,7 @@ form.onsubmit = async e => {
 	e.preventDefault();
 	const login = form.login.value;
   localStorage.ghToken = form.token.value;
-  const submitBtn = form.elements[form.elements.length-1];
-  submitBtn.disabled = true;
+	form.sb.disabled = true;
 
 	try {
 		const removables = []; // {id, name, parent, lvl (0: , 1 no branch from you, 2: branch without PR, 3: branch with a closed or merged PR)}
@@ -75,7 +74,7 @@ form.onsubmit = async e => {
 	} catch(err) {
 		output.innerHTML = `<a href="https://developer.github.com/v4/guides/forming-calls/#authenticating-with-graphql">${err && err.message || 'Create a GH token!'}</a>`
   }
-  submitBtn.disabled = false;
+  form.sb.disabled = false;
 };
 
 const getAllRefs = async ({owner, name, after: intialAfter}) => {
