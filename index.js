@@ -147,7 +147,7 @@ const getForks = ({login, after, first = 100}) => gql({
 		login, first, after
 	}
 })
-	.then(d => d.user)
+	.then(d => d.user);
 
 /* // could also query this for the forks, and check if a a branch 'in doubt' got merged in master (example if you got write perm)
 		parent {
@@ -232,8 +232,13 @@ const gql = ({query, variables}) => fetch('https://api.github.com/graphql', {
 	.then(async r => {
 		if (!r.ok) {
 			const d = await r.json();
-			throw new Error(d.message);
+			throw new Error(d.message || JSON.stringify(d));
 		}
 		if (r.status === 204) return;
-		return r.json().then(d => d.data);
+		return r.json().then(d => {
+			if (d.errors) {
+				throw new Error(d.errors[0] && d.errors[0].message || `Failed on query ${JSON.stringify(query)}`)
+			}
+			return d.data;
+		});
   });
