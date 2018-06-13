@@ -20,8 +20,8 @@ if (localStorage.ghToken) {
 	form.token.value = localStorage.ghToken;
 }
 
-form.onsubmit = async e => {
-	e.preventDefault();
+const submit = async e => {
+	if (e) e.preventDefault();
 	const login = form.login.value;
   localStorage.ghToken = form.token.value;
 	form.sb.disabled = true;
@@ -73,6 +73,8 @@ form.onsubmit = async e => {
   }
   form.sb.disabled = false;
 };
+
+form.onsubmit = submit;
 
 const getAllRefs = async ({owner, name, after: intialAfter}) => {
 	let after = intialAfter;
@@ -239,3 +241,9 @@ const gql = ({query, variables}) => fetch('https://api.github.com/graphql', {
 			return d.data;
 		});
   });
+
+
+if (location.hash.length > 1) {
+	form.login.value = location.hash.slice(1);
+	submit();
+}
