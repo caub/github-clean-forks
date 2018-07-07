@@ -209,10 +209,14 @@ const renderResults = removables => {
 		if (!li) return;
 		if (!window.confirm(`delete ${li.dataset.name} fork?`)) return;
 
-		fetch(`https://api.github.com/repos/${li.dataset.name}?access_token=${localStorage.ghToken}`, {method: 'DELETE'}).then(r => r.json())
-			.finally(() => {
-				const r = removables.filter(rep => rep.nameWithOwner !== li.dataset.name);
-				renderResults(r); // render again
+		fetch(`https://api.github.com/repos/${li.dataset.name}?access_token=${localStorage.ghToken}`, {method: 'DELETE'})
+			.then(async r => {
+				if (!r.ok) {
+					output.innerHTML = `error: ${(await r.json()).message}`;
+					return;
+				}
+				const rs = removables.filter(rep => rep.nameWithOwner !== li.dataset.name);
+				renderResults(rs); // render again
 			});
 	};
 }
