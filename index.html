@@ -36,6 +36,9 @@ button[type="submit"]::before {
 button[type="submit"]:disabled::before {
 	content: "";
 }
+button[name="sb"]::-moz-focus-inner{
+	border: none;
+}
 
 @keyframes loading {
   0%    { transform: rotate(0deg); }
