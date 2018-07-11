@@ -19,11 +19,15 @@ const form = document.forms[0];
 if (localStorage.ghToken) {
 	form.token.value = localStorage.ghToken;
 }
+if (localStorage.ghLogin) {
+	form.login.value = localStorage.ghLogin;
+}
 
 const submit = async e => {
 	if (e) e.preventDefault();
 	const login = form.login.value;
-  localStorage.ghToken = form.token.value;
+	localStorage.ghToken = form.token.value;
+	localStorage.ghLogin = form.login.value;
 	form.sb.disabled = true;
 
 	try {
@@ -250,5 +254,8 @@ const gql = ({query, variables}) => fetch('https://api.github.com/graphql', {
 
 if (location.hash.length > 1) {
 	form.login.value = location.hash.slice(1);
+	submit();
+}
+if (form.token.value && form.login.value) {
 	submit();
 }
