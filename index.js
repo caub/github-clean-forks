@@ -28,6 +28,7 @@ const submit = async e => {
 	const login = form.login.value;
 	localStorage.ghToken = form.token.value;
 	localStorage.ghLogin = form.login.value;
+	location.hash = form.login.value;
 	form.sb.disabled = true;
 
 	try {
