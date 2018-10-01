@@ -38,7 +38,6 @@ const submit = async e => {
 		for (let i=0; i<100; i++) {
 			user = await getForks({login, after: cursor});
 			const forks = user.repositories.nodes;
-			console.log(forks.length);
 
 			// inspect every fork, and see if it's safe to remove
 			for (const fork of forks) {
@@ -46,7 +45,7 @@ const submit = async e => {
 				if (fork.refs.pageInfo.hasNextPage) {
 					refs.push(...await getAllRefs({owner: login, name: fork.name, after: fork.refs.pageInfo.endCursor}));
 				}
-				// console.log(fork.name, refs.length);
+
 				const myBranches = fork.refs.nodes
 					.filter(ref => getAuthor(ref.target).email === user.email)
 					.map(({name, target, associatedPullRequests: {nodes: prs}}) => ({name, target, prs}))
