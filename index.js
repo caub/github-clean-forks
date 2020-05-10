@@ -214,7 +214,12 @@ const renderResults = removables => {
 		if (!li) return;
 		if (!window.confirm(`delete ${li.dataset.name} fork?`)) return;
 
-		fetch(`https://api.github.com/repos/${li.dataset.name}?access_token=${localStorage.ghToken}`, {method: 'DELETE'})
+		fetch(`https://api.github.com/repos/${li.dataset.name}`, {
+			method: 'DELETE',
+			headers: {
+				Authorization: `token ${localStorage.ghToken}`
+			},
+		})
 			.then(async r => {
 				if (!r.ok) {
 					alert(`error: ${(await r.json()).message}`);
@@ -230,7 +235,7 @@ const renderResults = removables => {
 const gql = ({query, variables}) => fetch('https://api.github.com/graphql', {
 	method: 'POST',
 	headers: {
-		Authorization: `bearer ${localStorage.ghToken}`
+		Authorization: `token ${localStorage.ghToken}`
 	},
 	body: JSON.stringify({
 		query,
